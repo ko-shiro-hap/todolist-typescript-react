@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import uuid from 'react-uuid';
 import './App.css'
 
 function App() {
@@ -7,7 +8,7 @@ function App() {
 
   type Todo = {
     inputValue: string;
-    id: number; //keyを指定するため
+    id: string; //keyを指定するため
     checked: boolean;
   };
 
@@ -17,6 +18,16 @@ function App() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    //新しいTodoを作成
+    const newTodo: Todo = {
+      inputValue: inputValue,
+      id: uuid(),
+      checked: false,
+    };
+
+    setTodos([newTodo, ...todos]);
+    setInputValue("");
   }
   return (
     <div className="App">
@@ -27,6 +38,13 @@ function App() {
           <input type="submit" value="作成" className="submitButton" />
         </form>
       </div>
+      <ul className='todoList'>
+        {todos.map((todo) => (
+          <li key={todo.id}>
+            {todo.inputValue}
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
