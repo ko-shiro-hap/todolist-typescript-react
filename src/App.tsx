@@ -1,32 +1,81 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
+import React, { useState } from 'react'
+import uuid from 'react-uuid';
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [inputValue, setInputValue] = useState("");
+  const [todos, setTodos] = useState<Todo[]>([]);
+
+  type Todo = {
+    inputValue: string;
+    id: string; //keyを指定するため
+    checked: boolean;
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  }
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    //新しいTodoを作成
+    const newTodo: Todo = {
+      inputValue: inputValue,
+      id: uuid(),
+      checked: false,
+    };
+
+    setTodos([newTodo, ...todos]);
+    setInputValue("");
+  }
+
+  const handleEdit = (id: string, inputValue: string) => {
+    const newTodos = todos.map((todo) => {
+      if(todo.id === id) {
+        todo.inputValue = inputValue;
+      }
+      return todo;
+    })
+
+    setTodos(newTodos);
+  }
+
+  const handleChecked = (id: string, checked: boolean) => {
+    const newTodos = todos.map((todo) => {
+      if(todo.id === id) {
+        todo.checked = !checked;
+      }
+      return todo;
+    })
+
+    setTodos(newTodos);
+  }
+
+  const handleDelete = (id: string) => {
+    const newTodos = todos.filter((todo) => todo.id !== id)
+
+    setTodos(newTodos);
+  }
 
   return (
     <div className="App">
       <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <h2>Todoリスト with Typescript</h2>
+        <form onSubmit={(e) => handleSubmit(e)}>
+          <input type="text" onChange={(e) => handleChange(e)} className="inputText" value={inputValue}/>
+          <input type="submit" value="作成" className="submitButton" />
+        </form>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <ul className='todoList'>
+        {todos.map((todo) => (
+          <li key={todo.id}>
+          <input type="text" onChange={(e) => handleEdit(todo.id, e.target.value)} className="inputText" value={todo.inputValue} disabled={todo.checked} />
+          <input type="checkbox" onChange={() => handleChecked(todo.id, todo.checked)}/>
+          <button onClick={() => handleDelete(todo.id)}>削除</button>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
